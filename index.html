@@ -2,7 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MineSweeper</title>
+    <style>
+        body {
+            height: 100%;
+            background-color: cadetblue;
+        }
+        .hidden {
+            background-color: lightslategray;
+            color: transparent;
+        }
+        .number {
+            background-color: wheat;
+        }
+        .safe {
+            background-color: green;
+        }
+        .bomb {
+            background-color: red;
+        }
+        .cell {
+            text-align: center;
+            display: inline-block;
+            cursor: pointer;
+            height: 20px;
+            flex: 0 0 20px;
+            border: 0.5px solid black;
+        }
+    </style>
 </head>
 <body>
 <div id="minesweeper"></div>
