@@ -45,11 +45,13 @@ body {
   }
 
   &__grid-container {
-    display: flex;
-    justify-content: center;
-    overflow-x: scroll;
+    display: block;
+    text-align: center;
+    overflow-x: auto;
   }
-
+  &__grid {
+    display: inline-block;
+  }
   &__placeholder {
     color: white;
     text-align: center;
