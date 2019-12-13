@@ -1,7 +1,7 @@
 import React from 'react';
 import Grid from '../components/Grid'
 import Header from '../components/Header';
-import { CONNECTION_STRING } from '../constants';
+import {CONNECTION_STRING, CELL_TYPES} from '../constants';
 import _ from 'lodash';
 import '../styles/main.scss';
 
@@ -11,6 +11,7 @@ class App extends React.Component {
     this.state = {
       passwords: ['ThisWasEasy', 'NotSoMuch'],
       serverConnected: true,
+      gameLost: false, //stop autofill safe spots if game lost
       grid: [],
       possibleMines: [],
       message: '',
@@ -25,7 +26,6 @@ class App extends React.Component {
       this.setState({serverConnected: true})
     };
     this.state.socket.onmessage = (event) => {
-      console.log(event.data);
       let response = event.data.split(':');
       switch (response[0]) {
         case 'new':
@@ -36,7 +36,7 @@ class App extends React.Component {
           break;
         case 'map':
           let grid = [];
-          //creating two dimensional array
+          //creating two dimensional array of incoming map
           let blocks = response[1].trim().replace(/\n/ig, ' ').split(' ');
           blocks.forEach((block, rowKey) => {
             let cells = block.split('');
@@ -44,7 +44,7 @@ class App extends React.Component {
             cells.forEach((cell, colKey) => {
               //filling cell object for future calculations
               cell = {
-                type: this.__isNumeric(cell) ? 'number' : (cell === '□' ? 'hidden' : 'bomb'),
+                type: this.__isNumeric(cell) ? CELL_TYPES.number : (cell === '□' ? CELL_TYPES.hidden : CELL_TYPES.bomb),
                 corX: rowKey,
                 corY: colKey,
                 value: cell
@@ -53,40 +53,40 @@ class App extends React.Component {
             });
             grid.push(row);
           });
-          //mark known bombs in map
+          //mark known bombs on map
           for (let i = 0; i < this.state.possibleMines.length; i++) {
             let item = this.state.possibleMines[i];
             let bomb = grid[item.row][item.col];
-            bomb.type = 'bomb';
+            bomb.type = CELL_TYPES.bomb;
           }
 
           for (let i = 0; i < grid.length; i++) {
             for (let j = 0; j < grid[i].length; j++) {
               let cell = grid[i][j];
-              if (cell.type === 'number') {
+              if (cell.type === CELL_TYPES.number) {
                 //find possible neighbors
                 let neighbors = this.__findingNeighbors(grid, i, j);
 
-                let hiddenSpots = _.filter(neighbors, {type: 'hidden'});
-                let bombs = _.filter(neighbors, {type: 'bomb'});
-
+                let hiddenSpots = _.filter(neighbors, {type: CELL_TYPES.hidden});
+                let bombs = _.filter(neighbors, {type: CELL_TYPES.bomb});
+                //mark possible mine and safe spots on map
                 this.__markMineAndSafeSpots(hiddenSpots, bombs, parseInt(cell.value))
               }
             }
           }
           this.setState({grid: grid}, () => {
             //auto open free spots, maybe need some button to enable/disable this
-            /*let freeSpot = _.find(_.flatten(grid), {'type': 'safe'});
-            if(!!freeSpot) {
+            let freeSpot = _.find(_.flatten(grid), {'type': CELL_TYPES.safe});
+            if (!!freeSpot && !this.state.gameLost) {
               this.state.socket.send(`open ${freeSpot.corY} ${freeSpot.corX}`);
-            }*/
+            }
 
           });
           break;
         case 'open':
           this.state.socket.send('map');
           if (response[1].trim() === 'You lose') {
-            this.setState({message: `${response[1]}`})
+            this.setState({message: `${response[1]}`, gameLost: true})
           } else if (response[1].trim() !== 'OK' && response[1].trim() !== 'You lose') {
             this.setState({message: `${response[1]} ${response[2]}`})
           }
@@ -109,19 +109,19 @@ class App extends React.Component {
 
   __markSafeSpots(hiddenSpots) {
     hiddenSpots.forEach(item => {
-      item.type = 'safe';
+      item.type = CELL_TYPES.safe;
     });
   }
 
   __markMineSpots(hiddenSpots) {
     let possibleMines = [];
     hiddenSpots.forEach(item => {
-      item.type = 'bomb';
+      item.type = CELL_TYPES.bomb;
       if (_.findIndex(this.state.possibleMines, {row: item.corX, col: item.corY}) === -1) {
         possibleMines.push({
           row: item.corX,
           col: item.corY,
-          type: 'bomb'
+          type: CELL_TYPES.bomb
         });
       }
     });
@@ -151,7 +151,7 @@ class App extends React.Component {
     e.preventDefault();
     if (e.type === 'click') {
     } else if (e.type === 'contextmenu') {
-      e.target.classList.toggle('bomb');
+      e.target.classList.toggle(CELL_TYPES.bomb);
     }
   }
 
@@ -162,14 +162,21 @@ class App extends React.Component {
   restartGame() {
     if (this.state.serverConnected) {
       //reset all data
-      this.setState({grid: [], possibleMines: [], message: null, freeSpot: {}}, () => {
+      this.setState({grid: [], possibleMines: [], message: null, freeSpot: {}, gameLost: false}, () => {
         this.state.socket.send(`new ${this.state.selectedLevel}`);
       });
     }
   }
 
   changeLevel(e) {
-    this.setState({selectedLevel: e.target.value, grid: [], possibleMines: [], message: null, freeSpot: {}}, () => {
+    this.setState({
+      selectedLevel: e.target.value,
+      grid: [],
+      possibleMines: [],
+      message: null,
+      freeSpot: {},
+      gameLost: false
+    }, () => {
       if (this.state.serverConnected) {
         this.state.socket.send(`new ${this.state.selectedLevel}`)
       }

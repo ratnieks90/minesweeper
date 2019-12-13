@@ -17,9 +17,7 @@ const Header = ({mineCounter, selectedLevel, changeLevel, restartGame, message})
       {!!selectedLevel &&
       <button className="minesweeper__restart" onClick={restartGame}>Restart</button>
       }
-      {!!message &&
       <h2 className="minesweeper__result">{message}</h2>
-      }
     </div>
   )
 };
