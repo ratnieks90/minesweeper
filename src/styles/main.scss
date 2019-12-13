@@ -1,0 +1,105 @@
+@import './variables';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  height: 100%;
+  font-family: 'Roboto', sans-serif;
+  background-color: cadetblue;
+  font-size: 1.6rem;
+}
+
+.minesweeper {
+  padding: 2rem;
+
+  &__header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+
+  &__counter {
+    font-size: 2.4rem;
+    font-weight: 500;
+    margin: 0 2rem;
+  }
+
+  &__select-level, &__restart {
+    font-size: 1.8rem;
+    width: 20rem;
+    cursor: pointer;
+    background-color: white;
+
+    &:hover {
+      background-color: darken(white, 10%);
+    }
+  }
+
+  &__grid-container {
+    display: flex;
+    justify-content: center;
+    overflow-x: scroll;
+  }
+
+  &__placeholder {
+    color: white;
+    text-align: center;
+    font-size: 3rem;
+    font-weight: 700;
+  }
+
+  &__result {
+    width: 100%;
+    text-align: center;
+    margin: 2rem 0 0 0;
+    color: aquamarine;
+  }
+
+  &__row {
+    display: flex;
+    width: auto;
+  }
+
+  &__cell {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    justify-content: center;
+    height: 2.4rem;
+    font-size: 1.8rem;
+    width: 2.4rem;
+    border: .1rem solid black;
+
+    &--hidden {
+      background-color: $hidden;
+      color: transparent;
+    }
+
+    &--number {
+      background-color: $number;
+    }
+
+    &--safe {
+      background-color: $safe;
+    }
+
+    &--bomb {
+      background-color: $bomb;
+    }
+  }
+}
+
+//mark possible bomb
+.bomb {
+  background-color: $bomb;
+}
