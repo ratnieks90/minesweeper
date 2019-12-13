@@ -94,6 +94,9 @@ class App extends React.Component {
       }
 
     }
+    this.state.socket.onclose = () => {
+      this.setState({serverConnected: false})
+    }
   }
 
   __markMineAndSafeSpots(hiddenSpots, bombSpots, cellValue) {
@@ -151,6 +154,7 @@ class App extends React.Component {
     e.preventDefault();
     if (e.type === 'click') {
     } else if (e.type === 'contextmenu') {
+      //todo need some fixes, bad solution
       e.target.classList.toggle(CELL_TYPES.bomb);
     }
   }
