@@ -1,4 +1,4 @@
-# minseweeper
+# minesweeper
 minesweeper game with some modifications
 
 1) npm i - to install all dependecies;
